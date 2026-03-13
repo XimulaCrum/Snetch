@@ -97,6 +97,7 @@ data class Task(
         data class Error(
             @Transient val throwable: Throwable = Throwable(),
             override val action: RestartableAction,
+            val userMessage: String? = null,
         ) : DownloadState, Restartable
 
         @Serializable data class Completed(val filePath: String?) : DownloadState

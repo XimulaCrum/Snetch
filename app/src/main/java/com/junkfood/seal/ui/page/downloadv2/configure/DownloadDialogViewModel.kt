@@ -12,6 +12,7 @@ import com.junkfood.seal.util.FORMAT_SELECTION
 import com.junkfood.seal.util.PlaylistResult
 import com.junkfood.seal.util.PreferenceUtil
 import com.junkfood.seal.util.PreferenceUtil.getBoolean
+import com.junkfood.seal.util.ToastUtil
 import com.junkfood.seal.util.VideoInfo
 import com.yausername.youtubedl_android.YoutubeDL
 import kotlinx.coroutines.Dispatchers
@@ -188,6 +189,7 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
         val job =
             viewModelScope.launch(Dispatchers.IO) {
                 runCatching {
+                    var totalQueued = 0
                     urlList.forEach { url ->
                         val playlistOrVideo =
                             DownloadUtil.getPlaylistOrVideoInfo(
@@ -204,6 +206,7 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
                                     playlistResult = playlistOrVideo,
                                     preferences = preferences,
                                 )
+                                .also { totalQueued += it.size }
                                 .forEach(downloader::enqueue)
                         } else {
                             val info =
@@ -220,10 +223,24 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
                                     preferences = preferences,
                                 )
                             )
+                            totalQueued += 1
                         }
                     }
+                    totalQueued
                 }.onSuccess {
                     withContext(Dispatchers.Main) {
+                        when {
+                            it <= 0 -> {}
+                            it == 1 -> ToastUtil.makeToast(com.junkfood.seal.R.string.task_added)
+                            else ->
+                                ToastUtil.makeToastSuspend(
+                                    com.junkfood.seal.App.context.resources.getQuantityString(
+                                        com.junkfood.seal.R.plurals.tasks_added_to_queue_count,
+                                        it,
+                                        it,
+                                    )
+                                )
+                        }
                         hideDialog()
                     }
                 }.onFailure { th ->

@@ -16,4 +16,5 @@
 .cxx
 local.properties
 /keystore.properties
+/.keys
 .kotlin

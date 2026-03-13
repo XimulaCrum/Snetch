@@ -4,105 +4,85 @@
 
 Queue-first video and audio downloader for Android.
 
-Snetch is an Android downloader built on top of the same `yt-dlp`-powered foundation that made Seal useful, but with a different product direction: calmer task flow, cleaner queue behavior, and more practical day-to-day handling on real devices.
-
-Instead of leaning into "start everything at once," Snetch is meant to feel more deliberate. Add links freely, let tasks line up properly, keep progress readable, and let the app work through downloads in a steadier order. The goal is not to be louder than other downloaders. The goal is to be easier to live with.
+Snetch is a fork built on top of the same `yt-dlp` foundation that made Seal useful, but it pushes the product in a more practical direction for day-to-day use on real devices. The focus is simple: cleaner queue behavior, saner defaults, and fewer surprises once you start stacking links.
 
 ## Why Snetch
 
-Most Android downloaders feel fast right up until they become noisy:
+Many Android downloaders look fine until they start doing too much at once:
 
-- several tasks begin fighting over storage and CPU
-- the queue becomes harder to read
-- heavy post-processing makes weaker devices stumble
-- metered networks start downloads you did not mean to start
+- multiple downloads fight over storage and CPU
+- queue state becomes hard to read
+- heavy post-processing hits weaker devices hard
+- metered networks start work you did not mean to allow
 
-Snetch is a response to that.
-
-It favors:
-
-- sequential task handling over messy burst behavior
-- queue visibility over hidden background churn
-- Wi-Fi-aware starts over accidental cellular usage
-- practical stability over feature sprawl
+Snetch is meant to stay calmer than that.
 
 ## Current Direction
 
-Snetch is currently focused on a few concrete improvements:
+The fork is currently focused on a few specific improvements:
 
-- cleaner queue behavior for people who add multiple links
-- Wi-Fi-only download flow that keeps tasks queued until an unmetered network is available
-- more careful Android temp-file handling during download and post-processing
-- simpler, calmer UX choices for devices that do not enjoy aggressive parallel work
+- sequential task handling instead of messy burst behavior
+- saved presets that can auto-queue links without reopening format choices every time
+- playlist links that expand into individual queued tasks
+- Wi-Fi-aware queueing that waits for an unmetered network when needed
+- safer Android temp-file handling during download and post-processing
+- clearer task states and more useful failure messages
 
-This does not mean Snetch is "basic." It means the app is being shaped around predictable behavior first.
+This is not about making the app smaller. It is about making it easier to live with.
 
 ## Features
 
 - Download video and audio from sites supported by [`yt-dlp`](https://github.com/yt-dlp/yt-dlp)
 - Queue-first workflow for adding and managing tasks
-- Sequential downloading for cleaner progress and lower device strain
-- Wi-Fi-only behavior for queued tasks on unmetered networks
-- Format selection, audio extraction, subtitles, thumbnails, and metadata support
-- Custom `yt-dlp` command templates for advanced users
+- Sequential downloads by default
+- Saved audio/video presets for repeat downloads
+- Playlist expansion into individual queued items
+- Wi-Fi-only queueing for metered-network control
+- Format selection, subtitles, thumbnails, metadata, and custom command templates
 - Material 3 Android UI
 
-## Philosophy
+## Release Notes
 
-Snetch is not trying to become an everything-at-once downloader.
+Recent work in this fork includes:
 
-It is aimed at people who want:
+- independent `applicationId` so Snetch can coexist with upstream installs
+- fork branding and launcher icon updates
+- preset-first link handling with info fetch before queueing
+- playlist bulk enqueue support
+- friendlier queue state labels
+- more direct error classification for common failures like Cloudflare, login requirements, cookies, and Android file access issues
 
-- a download queue that stays understandable
-- a downloader that behaves well on phones and tablets
-- fewer background surprises
-- a tool that still feels powerful without feeling chaotic
+## Signing Release Builds
 
-If your ideal downloader feels more like "line it up and let it finish properly," that is the design target here.
+Public releases should use a dedicated signing key.
+
+- Sample config: [`keystore.properties.example`](/C:/Users/Administrator/Documents/codexx/Seal/keystore.properties.example)
+- Setup notes: [`docs/release-signing.md`](docs/release-signing.md)
+
+If no custom keystore is configured, release builds still fall back to the debug key so local test APKs remain installable.
 
 ## Installation
 
-Releases are intended to be published through GitHub Releases.
+Releases are published through GitHub Releases.
 
-Recommended APK for most modern Android devices:
+Recommended APK for most current Android devices:
 
 - `arm64-v8a`
 
-Planned release channels:
-
-- stable builds for everyday use
-- preview builds for testing newer changes earlier
-
 ## Status
 
-Snetch is an actively reworked fork. Some parts still inherit upstream naming, structure, and package layout while the fork is being separated into its own release identity.
-
-That means you should expect:
-
-- branding cleanup in progress
-- package and release polish still underway
-- feature behavior being verified on both emulator and physical devices
-
-## Roadmap
-
-- finish fork-specific branding and release assets
-- separate package identity where needed for independent distribution
-- improve queue visibility and waiting-state messaging
-- continue hardening Android storage and post-processing behavior
-- prepare cleaner public releases
+Snetch is an actively maintained fork. Some internal package names still follow upstream structure, but the install identity and public-facing branding are already separated.
 
 ## Credits
 
 Snetch is a fork of [Seal](https://github.com/JunkFood02/Seal).
 
-It also depends on and builds on the work of:
+It also depends on and builds on:
 
 - [`yt-dlp`](https://github.com/yt-dlp/yt-dlp)
 - [`youtubedl-android`](https://github.com/yausername/youtubedl-android)
 - [`aria2`](https://github.com/aria2/aria2)
 - [`mutagen`](https://github.com/quodlibet/mutagen)
-
-Upstream projects and their maintainers deserve the credit for the foundations this fork builds on.
 
 ## Contributing
 
@@ -111,13 +91,11 @@ If you open an issue, include:
 - device model
 - Android version
 - whether the problem happened on Wi-Fi or cellular
-- the rough reproduction steps
-- any relevant log output
+- rough reproduction steps
+- useful logs or screenshots
 
 Small, focused reports are much easier to act on than broad complaints.
 
 ## License
 
-Snetch remains open-source under the same GPLv3 code licensing terms inherited from upstream where applicable. See [LICENSE](LICENSE).
-
-The code is open. The branding and release identity of this fork are separate from upstream Seal.
+Snetch remains open-source under GPLv3 where inherited from upstream. See [LICENSE](LICENSE).

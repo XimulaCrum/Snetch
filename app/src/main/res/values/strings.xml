@@ -152,11 +152,13 @@
     <string name="github_issue_desc">Submit an issue for bug report or feature request</string>
     <string name="info_copied">Info copied to clipboard</string>
 
-    <string name="status_enqueued">Enqueued</string>
+    <string name="status_enqueued">Queued</string>
     <string name="status_completed">Finished</string>
     <string name="status_downloading">Downloading</string>
     <string name="status_canceled">Canceled</string>
     <string name="status_fetching_video_info">Fetching info</string>
+    <string name="status_waiting_for_wifi">Waiting for Wi-Fi</string>
+    <string name="status_waiting_for_network">Waiting for network</string>
     <string name="open_file">Open file</string>
     <string name="restart">Restart</string>
     <string name="status_error">Error</string>
@@ -424,6 +426,14 @@
     <string name="edit_preset">Edit preset</string>
     <string name="best_quality_desc">Download the best available format</string>
     <string name="task_added">Task added to queue</string>
+    <string name="error_fetching_video_info_detailed">Could not read media info from this link.</string>
+    <string name="error_downloading_media_detailed">Could not finish this download.</string>
+    <string name="error_cloudflare_protected">This site is protected by Cloudflare. Try cookies or browser-backed access.</string>
+    <string name="error_login_required">This link needs a logged-in account.</string>
+    <string name="error_cookies_required">This site may require cookies before it will download.</string>
+    <string name="error_storage_access">Android could not open a temp or output file. Check storage access and temp-file settings.</string>
+    <string name="error_javascript_runtime">This site expects a JavaScript runtime, so some formats may not be available here.</string>
+    <string name="error_access_denied">The site denied this request. Cookies or a different session may be required.</string>
     <string name="you_ll_find_your_downloads_here">You\'ll find your downloads here</string>
     <string name="download_hint">Tap on the download button or share a video link to this app to start a download</string>
     <string name="status_downloaded">Downloaded</string>
@@ -451,5 +461,9 @@
     <plurals name="audio_count">
         <item quantity="one">%d audio</item>
         <item quantity="other">%d audios</item>
+    </plurals>
+    <plurals name="tasks_added_to_queue_count">
+        <item quantity="one">Added %d task to queue</item>
+        <item quantity="other">Added %d tasks to queue</item>
     </plurals>
 </resources>

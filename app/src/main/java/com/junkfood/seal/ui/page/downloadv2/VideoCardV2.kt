@@ -75,6 +75,8 @@ import com.junkfood.seal.ui.common.LocalFixedColorRoles
 import com.junkfood.seal.ui.common.motion.materialSharedAxisY
 import com.junkfood.seal.ui.component.GreenTonalPalettes
 import com.junkfood.seal.ui.theme.SealTheme
+import com.junkfood.seal.util.PreferenceUtil
+import com.junkfood.seal.util.QueueWaitReason
 import com.junkfood.seal.util.toDurationText
 import com.junkfood.seal.util.toFileSizeText
 import kotlinx.coroutines.Job
@@ -412,10 +414,22 @@ fun ListItemStateText(
             when (downloadState) {
                 is Canceled -> stringResource(R.string.status_canceled)
                 is Completed -> stringResource(R.string.status_downloaded)
-                is Error -> stringResource(R.string.status_error)
+                is Error -> downloadState.userMessage ?: stringResource(R.string.status_error)
                 is FetchingInfo -> stringResource(R.string.status_fetching_video_info)
-                Idle -> stringResource(R.string.status_enqueued)
-                ReadyWithInfo -> stringResource(R.string.status_enqueued)
+                Idle,
+                ReadyWithInfo -> {
+                    when (PreferenceUtil.getQueueWaitReason()) {
+                        QueueWaitReason.NoNetwork -> {
+                            stringResource(R.string.status_waiting_for_network)
+                        }
+
+                        QueueWaitReason.WifiOnly -> {
+                            stringResource(R.string.status_waiting_for_wifi)
+                        }
+
+                        QueueWaitReason.Ready -> stringResource(R.string.status_enqueued)
+                    }
+                }
                 is Running -> {
                     val progress = downloadState.progress
                     if (progress >= 0) {
@@ -492,10 +506,16 @@ private fun CardItemStateText(modifier: Modifier = Modifier, downloadState: Task
         when (downloadState) {
             is Canceled -> R.string.status_canceled
             is Completed -> R.string.status_downloaded
-            is Error -> R.string.status_error
+            is Error -> null
             is FetchingInfo -> R.string.status_fetching_video_info
-            Idle -> R.string.status_enqueued
-            ReadyWithInfo -> R.string.status_enqueued
+            Idle,
+            ReadyWithInfo -> {
+                when (PreferenceUtil.getQueueWaitReason()) {
+                    QueueWaitReason.NoNetwork -> R.string.status_waiting_for_network
+                    QueueWaitReason.WifiOnly -> R.string.status_waiting_for_wifi
+                    QueueWaitReason.Ready -> R.string.status_enqueued
+                }
+            }
             is Running -> R.string.status_downloading
         }
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
@@ -509,7 +529,11 @@ private fun CardItemStateText(modifier: Modifier = Modifier, downloadState: Task
             Spacer(Modifier.width(4.dp))
         }
         Text(
-            text = stringResource(id = text),
+            text = if (downloadState is Error) {
+                downloadState.userMessage ?: stringResource(R.string.status_error)
+            } else {
+                stringResource(id = checkNotNull(text))
+            },
             modifier = Modifier,
             style = textStyle,
             color = contentColor,

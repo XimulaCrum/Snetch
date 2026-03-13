@@ -140,6 +140,7 @@ import com.junkfood.seal.util.SUBTITLE
 import com.junkfood.seal.util.TEMPLATE_ID
 import com.junkfood.seal.util.THUMBNAIL
 import com.junkfood.seal.util.ToastUtil
+import com.junkfood.seal.util.DownloadErrorUtil
 import com.junkfood.seal.util.USE_CUSTOM_AUDIO_PRESET
 import com.junkfood.seal.util.VIDEO_FORMAT
 import com.junkfood.seal.util.VIDEO_QUALITY
@@ -297,9 +298,10 @@ private fun ErrorPage(modifier: Modifier = Modifier, state: Error, onActionPost:
             modifier = Modifier.size(40.dp),
         )
         Text(
-            text = stringResource(R.string.fetch_info_error_msg),
+            text = DownloadErrorUtil.getUserMessage(App.context, state.throwable, true),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(top = 12.dp),
+            textAlign = TextAlign.Center,
         )
         Text(
             text = state.throwable.message.toString(),

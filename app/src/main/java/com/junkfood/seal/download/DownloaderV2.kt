@@ -20,6 +20,7 @@ import com.junkfood.seal.download.Task.RestartableAction.Download
 import com.junkfood.seal.download.Task.RestartableAction.FetchInfo
 import com.junkfood.seal.download.Task.TypeInfo
 import com.junkfood.seal.util.DownloadUtil
+import com.junkfood.seal.util.DownloadErrorUtil
 import com.junkfood.seal.util.FileUtil
 import com.junkfood.seal.util.NotificationUtil
 import com.junkfood.seal.util.PreferenceUtil
@@ -273,13 +274,25 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                         if (throwable is YoutubeDL.CanceledException) {
                             return@onFailure
                         }
+                        val userMessage =
+                            DownloadErrorUtil.getUserMessage(
+                                context = appContext,
+                                throwable = throwable,
+                                isFetchingInfo = true,
+                            )
                         Log.e(TAG, "Failed to fetch info for ${task.url}", throwable)
-                        task.downloadState = Error(throwable = throwable, action = FetchInfo)
+                        task.downloadState =
+                            Error(
+                                throwable = throwable,
+                                action = FetchInfo,
+                                userMessage = userMessage,
+                            )
                         NotificationUtil.notifyError(
                             title = viewState.title,
                             textId = R.string.download_error_msg,
                             notificationId = notificationId,
                             report = throwable.stackTraceToString(),
+                            text = userMessage,
                         )
                     }
             }
@@ -346,13 +359,25 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                         if (throwable is YoutubeDL.CanceledException) {
                             return@onFailure
                         }
+                        val userMessage =
+                            DownloadErrorUtil.getUserMessage(
+                                context = appContext,
+                                throwable = throwable,
+                                isFetchingInfo = false,
+                            )
                         Log.e(TAG, "Failed to download ${task.url}", throwable)
-                        downloadState = Error(throwable = throwable, action = Download)
+                        downloadState =
+                            Error(
+                                throwable = throwable,
+                                action = Download,
+                                userMessage = userMessage,
+                            )
                         NotificationUtil.notifyError(
                             title = viewState.title,
                             textId = R.string.fetch_info_error_msg,
                             notificationId = notificationId,
                             report = throwable.stackTraceToString(),
+                            text = userMessage,
                         )
                     }
             }
@@ -438,13 +463,25 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                         if (throwable is YoutubeDL.CanceledException) {
                             return@onFailure
                         }
+                        val userMessage =
+                            DownloadErrorUtil.getUserMessage(
+                                context = appContext,
+                                throwable = throwable,
+                                isFetchingInfo = false,
+                            )
                         Log.e(TAG, "Failed to execute custom command for ${task.url}", throwable)
-                        downloadState = Error(throwable = throwable, action = Download)
+                        downloadState =
+                            Error(
+                                throwable = throwable,
+                                action = Download,
+                                userMessage = userMessage,
+                            )
                         NotificationUtil.notifyError(
                             title = viewState.title,
                             textId = R.string.fetch_info_error_msg,
                             notificationId = notificationId,
                             report = throwable.stackTraceToString(),
+                            text = userMessage,
                         )
                     }
                     .onSuccess {

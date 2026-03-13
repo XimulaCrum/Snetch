@@ -145,6 +145,12 @@ enum class DownloadType {
     Command,
 }
 
+enum class QueueWaitReason {
+    Ready,
+    NoNetwork,
+    WifiOnly,
+}
+
 const val CONVERT_ASS = 1
 const val CONVERT_LRC = 2
 const val CONVERT_SRT = 3
@@ -327,6 +333,22 @@ object PreferenceUtil {
         if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) return false
         return CELLULAR_DOWNLOAD.getBoolean() ||
             caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+    }
+
+    fun getQueueWaitReason(): QueueWaitReason {
+        val activeNetwork = App.connectivityManager.activeNetwork ?: return QueueWaitReason.NoNetwork
+        val caps =
+            App.connectivityManager.getNetworkCapabilities(activeNetwork)
+                ?: return QueueWaitReason.NoNetwork
+        if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+            return QueueWaitReason.NoNetwork
+        }
+        if (!CELLULAR_DOWNLOAD.getBoolean() &&
+            !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+        ) {
+            return QueueWaitReason.WifiOnly
+        }
+        return QueueWaitReason.Ready
     }
 
     fun isAutoUpdateEnabled(): Boolean {

@@ -175,6 +175,7 @@ object NotificationUtil {
         textId: Int = R.string.download_error_msg,
         notificationId: Int,
         report: String,
+        text: String? = null,
     ) {
         if (!NOTIFICATION.getBoolean()) return
 
@@ -197,7 +198,7 @@ object NotificationUtil {
         NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_seal)
             .setContentTitle(title)
-            .setContentText(context.getString(textId))
+            .setContentText(text ?: context.getString(textId))
             .setOngoing(false)
             .addAction(
                 R.drawable.outline_content_copy_24,
