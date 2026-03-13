@@ -7,6 +7,7 @@ This release is the first public-facing step toward separating the fork from ups
 ## Highlights
 
 - Reworked branding for the fork under the new name **Snetch**
+- Separated Android application ID so Snetch can coexist with upstream Seal installs
 - New sack-inspired launcher icon direction for the fork build
 - Queue-first download behavior with sequential task handling
 - Wi-Fi-only task flow that keeps new downloads queued until an unmetered network is available
@@ -19,7 +20,7 @@ Snetch is for people who want a downloader that feels steadier than the default 
 ## Notes
 
 - This release is still part of an active fork separation process
-- Some internal identifiers and upstream structure may still be in transition
+- Internal source packages still follow upstream structure in places, but install identity is now separated
 - Real-device testing has been done across emulator and physical Android hardware, but more cleanup is still planned
 
 ## Credits
