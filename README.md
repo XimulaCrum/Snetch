@@ -1,5 +1,7 @@
 # Snetch
 
+[English](README.md) | [한국어](README.ko.md)
+
 Queue-first video and audio downloader for Android.
 
 Snetch is an Android downloader built on top of the same `yt-dlp`-powered foundation that made Seal useful, but with a different product direction: calmer task flow, cleaner queue behavior, and more practical day-to-day handling on real devices.
