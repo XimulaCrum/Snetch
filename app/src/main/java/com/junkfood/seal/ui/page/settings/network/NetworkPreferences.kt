@@ -8,9 +8,9 @@ import androidx.compose.material.icons.outlined.Cookie
 import androidx.compose.material.icons.outlined.OfflineBolt
 import androidx.compose.material.icons.outlined.SettingsEthernet
 import androidx.compose.material.icons.outlined.SignalCellular4Bar
-import androidx.compose.material.icons.outlined.SignalCellularConnectedNoInternet4Bar
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.VpnKey
+import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
@@ -98,19 +98,17 @@ fun NetworkPreferences(navigateToCookieProfilePage: () -> Unit = {}, onNavigateB
                     )
                 }
                 item {
-                    var isDownloadWithCellularEnabled by remember {
-                        mutableStateOf(CELLULAR_DOWNLOAD.getBoolean())
-                    }
+                    var isWifiOnlyEnabled by remember { mutableStateOf(!CELLULAR_DOWNLOAD.getBoolean()) }
                     PreferenceSwitch(
-                        title = stringResource(R.string.download_with_cellular),
-                        description = stringResource(R.string.download_with_cellular_desc),
+                        title = stringResource(R.string.download_on_wifi_only),
+                        description = stringResource(R.string.download_on_wifi_only_desc),
                         icon =
-                            if (isDownloadWithCellularEnabled) Icons.Outlined.SignalCellular4Bar
-                            else Icons.Outlined.SignalCellularConnectedNoInternet4Bar,
-                        isChecked = isDownloadWithCellularEnabled,
+                            if (isWifiOnlyEnabled) Icons.Outlined.Wifi
+                            else Icons.Outlined.SignalCellular4Bar,
+                        isChecked = isWifiOnlyEnabled,
                         onClick = {
-                            isDownloadWithCellularEnabled = !isDownloadWithCellularEnabled
-                            updateValue(CELLULAR_DOWNLOAD, isDownloadWithCellularEnabled)
+                            isWifiOnlyEnabled = !isWifiOnlyEnabled
+                            updateValue(CELLULAR_DOWNLOAD, !isWifiOnlyEnabled)
                         },
                     )
                 }

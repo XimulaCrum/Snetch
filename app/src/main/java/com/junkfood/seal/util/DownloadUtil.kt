@@ -26,6 +26,7 @@ import com.junkfood.seal.util.FileUtil.getArchiveFile
 import com.junkfood.seal.util.FileUtil.getConfigFile
 import com.junkfood.seal.util.FileUtil.getCookiesFile
 import com.junkfood.seal.util.FileUtil.getExternalTempDir
+import com.junkfood.seal.util.FileUtil.getInternalTempDir
 import com.junkfood.seal.util.FileUtil.getFileName
 import com.junkfood.seal.util.FileUtil.getSdcardTempDir
 import com.junkfood.seal.util.FileUtil.moveFilesToSdcard
@@ -776,7 +777,7 @@ object DownloadUtil {
                         addCommands(listOf("--replace-in-metadata", "title", ".+", newTitle))
                     }
                     if (Build.VERSION.SDK_INT > 23 && !sdcard)
-                        addOption("-P", "temp:" + getExternalTempDir())
+                        addOption("-P", "temp:" + context.getInternalTempDir().absolutePath)
 
                     if (splitByChapter) {
                         addOption("-o", OUTPUT_TEMPLATE_CHAPTERS)

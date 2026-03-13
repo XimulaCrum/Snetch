@@ -10,6 +10,8 @@ import android.content.ServiceConnection
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
+import android.net.Network
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -46,6 +48,8 @@ import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.koin.androidContext
@@ -85,6 +89,25 @@ class App : Application() {
 
         clipboard = getSystemService()!!
         connectivityManager = getSystemService()!!
+        refreshDownloadNetworkAvailability()
+        connectivityManager.registerDefaultNetworkCallback(
+            object : NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    refreshDownloadNetworkAvailability()
+                }
+
+                override fun onLost(network: Network) {
+                    refreshDownloadNetworkAvailability()
+                }
+
+                override fun onCapabilitiesChanged(
+                    network: Network,
+                    networkCapabilities: android.net.NetworkCapabilities,
+                ) {
+                    refreshDownloadNetworkAvailability()
+                }
+            }
+        )
 
         applicationScope.launch((Dispatchers.IO)) {
             try {
@@ -130,6 +153,8 @@ class App : Application() {
         lateinit var applicationScope: CoroutineScope
         lateinit var connectivityManager: ConnectivityManager
         lateinit var packageInfo: PackageInfo
+        private val mutableDownloadNetworkAvailable = MutableStateFlow(false)
+        val downloadNetworkAvailable = mutableDownloadNetworkAvailable.asStateFlow()
 
         var isServiceRunning = false
 
@@ -222,6 +247,10 @@ class App : Application() {
         fun isFDroidBuild(): Boolean = BuildConfig.FLAVOR == "fdroid"
 
         fun isDebugBuild(): Boolean = BuildConfig.DEBUG
+
+        private fun refreshDownloadNetworkAvailability() {
+            mutableDownloadNetworkAvailable.value = PreferenceUtil.isNetworkAvailableForDownload()
+        }
 
         @SuppressLint("StaticFieldLeak") lateinit var context: Context
     }

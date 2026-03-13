@@ -1,6 +1,7 @@
 package com.junkfood.seal.util
 
 import android.os.Build
+import android.net.NetworkCapabilities
 import androidx.annotation.DeprecatedSinceApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
@@ -303,8 +304,13 @@ object PreferenceUtil {
 
     fun updateDownloadType(type: DownloadType) = DOWNLOAD_TYPE.updateInt(type.ordinal)
 
-    fun isNetworkAvailableForDownload() =
-        CELLULAR_DOWNLOAD.getBoolean() || !App.connectivityManager.isActiveNetworkMetered
+    fun isNetworkAvailableForDownload(): Boolean {
+        val activeNetwork = App.connectivityManager.activeNetwork ?: return false
+        val caps = App.connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+        if (!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) return false
+        return CELLULAR_DOWNLOAD.getBoolean() ||
+            caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+    }
 
     fun isAutoUpdateEnabled(): Boolean {
         return when {

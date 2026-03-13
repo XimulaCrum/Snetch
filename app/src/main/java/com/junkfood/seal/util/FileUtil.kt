@@ -192,7 +192,11 @@ object FileUtil {
 
     fun Context.getArchiveFile(): File = filesDir.createEmptyFile("archive.txt").getOrThrow()
 
-    fun Context.getInternalTempDir() = File(filesDir, "tmp")
+    fun Context.getInternalTempDir() =
+        File(filesDir, "tmp").apply {
+            mkdirs()
+            createEmptyFile(".nomedia")
+        }
 
     internal fun getExternalDownloadDirectory() =
         File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Seal")

@@ -32,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -40,7 +41,7 @@ import org.koin.core.component.KoinComponent
 
 private const val TAG = "DownloaderV2"
 
-private const val MAX_CONCURRENCY = 3
+private const val MAX_CONCURRENCY = 1
 
 interface DownloaderV2 {
     fun getTaskStateMap(): SnapshotStateMap<Task, Task.State>
@@ -105,6 +106,10 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                 .map { it.countRunning() }
                 .distinctUntilChanged()
                 .collect { if (it > 0) App.startService() else App.stopService() }
+        }
+
+        scope.launch(Dispatchers.Default) {
+            App.downloadNetworkAvailable.collectLatest { doYourWork() }
         }
 
         scope.launch(Dispatchers.IO) {
@@ -216,7 +221,9 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
         get() = id.hashCode()
 
     /** Processes pending tasks, prioritizing downloads. */
+    @Synchronized
     private fun doYourWork() {
+        if (!PreferenceUtil.isNetworkAvailableForDownload()) return
         if (taskStateMap.countRunning() >= MAX_CONCURRENCY) return
 
         taskStateMap.entries
@@ -266,6 +273,7 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                         if (throwable is YoutubeDL.CanceledException) {
                             return@onFailure
                         }
+                        Log.e(TAG, "Failed to fetch info for ${task.url}", throwable)
                         task.downloadState = Error(throwable = throwable, action = FetchInfo)
                         NotificationUtil.notifyError(
                             title = viewState.title,
@@ -280,6 +288,7 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
 
     private fun Task.download() {
         check(downloadState == ReadyWithInfo && info != null)
+        val task = this
         if (type is TypeInfo.CustomCommand) {
             execute()
             return
@@ -337,6 +346,7 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                         if (throwable is YoutubeDL.CanceledException) {
                             return@onFailure
                         }
+                        Log.e(TAG, "Failed to download ${task.url}", throwable)
                         downloadState = Error(throwable = throwable, action = Download)
                         NotificationUtil.notifyError(
                             title = viewState.title,
@@ -399,6 +409,7 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
     private fun Task.execute() {
         check(downloadState == Idle)
         check(type is TypeInfo.CustomCommand)
+        val task = this
         val template = type.template
         scope
             .launch {
@@ -427,6 +438,7 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                         if (throwable is YoutubeDL.CanceledException) {
                             return@onFailure
                         }
+                        Log.e(TAG, "Failed to execute custom command for ${task.url}", throwable)
                         downloadState = Error(throwable = throwable, action = Download)
                         NotificationUtil.notifyError(
                             title = viewState.title,
