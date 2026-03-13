@@ -6,8 +6,12 @@ import com.junkfood.seal.database.objects.CommandTemplate
 import com.junkfood.seal.download.DownloaderV2
 import com.junkfood.seal.download.Task
 import com.junkfood.seal.download.TaskFactory
+import com.junkfood.seal.util.DownloadType
 import com.junkfood.seal.util.DownloadUtil
+import com.junkfood.seal.util.FORMAT_SELECTION
 import com.junkfood.seal.util.PlaylistResult
+import com.junkfood.seal.util.PreferenceUtil
+import com.junkfood.seal.util.PreferenceUtil.getBoolean
 import com.junkfood.seal.util.VideoInfo
 import com.yausername.youtubedl_android.YoutubeDL
 import kotlinx.coroutines.Dispatchers
@@ -178,26 +182,45 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
     private fun downloadWithPreset(
         urlList: List<String>,
         preferences: DownloadUtil.DownloadPreferences,
+        revealSheetOnFailure: Boolean = false,
     ) {
         val taskKey = "DownloadPreset_${urlList.joinToString(separator = "|")}"
         val job =
             viewModelScope.launch(Dispatchers.IO) {
                 runCatching {
                     urlList.forEach { url ->
-                        val info =
-                            DownloadUtil.fetchVideoInfoFromUrl(
-                                    url = url,
-                                    preferences = preferences,
-                                    taskKey = taskKey,
+                        val playlistOrVideo =
+                            DownloadUtil.getPlaylistOrVideoInfo(
+                                    playlistURL = url,
+                                    downloadPreferences = preferences,
                                 )
-                                .getOrThrow()
+                                .getOrNull()
 
-                        downloader.enqueue(
-                            TaskFactory.createWithFetchedInfo(
-                                info = info,
-                                preferences = preferences,
+                        if (playlistOrVideo is PlaylistResult && !playlistOrVideo.entries.isNullOrEmpty()) {
+                            val indexList = playlistOrVideo.entries.indices.map { it + 1 }
+                            TaskFactory.createWithPlaylistResult(
+                                    playlistUrl = playlistOrVideo.originalUrl ?: url,
+                                    indexList = indexList,
+                                    playlistResult = playlistOrVideo,
+                                    preferences = preferences,
+                                )
+                                .forEach(downloader::enqueue)
+                        } else {
+                            val info =
+                                DownloadUtil.fetchVideoInfoFromUrl(
+                                        url = url,
+                                        preferences = preferences,
+                                        taskKey = taskKey,
+                                    )
+                                    .getOrThrow()
+
+                            downloader.enqueue(
+                                TaskFactory.createWithFetchedInfo(
+                                    info = info,
+                                    preferences = preferences,
+                                )
                             )
-                        )
+                        }
                     }
                 }.onSuccess {
                     withContext(Dispatchers.Main) {
@@ -205,6 +228,9 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
                     }
                 }.onFailure { th ->
                     withContext(Dispatchers.Main) {
+                        if (revealSheetOnFailure) {
+                            mSheetValueFlow.update { SheetValue.Expanded }
+                        }
                         mSheetStateFlow.update {
                             SheetState.Error(
                                 action =
@@ -249,11 +275,32 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
     private fun showDialog(action: Action.ShowSheet) {
         val urlList = action.urlList
         if (!urlList.isNullOrEmpty()) {
+            if (shouldAutoQueueWithSavedPreset()) {
+                downloadWithPreset(
+                    urlList = urlList,
+                    preferences =
+                        DownloadUtil.DownloadPreferences
+                            .createFromPreferences()
+                            .copy(
+                                extractAudio =
+                                    PreferenceUtil.getDownloadType() == DownloadType.Audio
+                            ),
+                    revealSheetOnFailure = true,
+                )
+                return
+            }
             mSheetStateFlow.update { SheetState.Configure(urlList) }
         } else {
             mSheetStateFlow.update { SheetState.InputUrl }
         }
         mSheetValueFlow.update { SheetValue.Expanded }
+    }
+
+    private fun shouldAutoQueueWithSavedPreset(): Boolean {
+        val downloadType = PreferenceUtil.getDownloadType() ?: return false
+        return PreferenceUtil.hasSavedDefaultDownloadPreset() &&
+            !FORMAT_SELECTION.getBoolean() &&
+            (downloadType == DownloadType.Audio || downloadType == DownloadType.Video)
     }
 
     private fun cancel(): Boolean {

@@ -281,6 +281,23 @@ object PreferenceUtil {
 
     fun containsKey(key: String) = kv.containsKey(key)
 
+    fun hasSavedDefaultDownloadPreset(): Boolean {
+        return listOf(
+            DOWNLOAD_TYPE,
+            FORMAT_SELECTION,
+            EXTRACT_AUDIO,
+            VIDEO_FORMAT,
+            VIDEO_QUALITY,
+            AUDIO_CONVERT,
+            AUDIO_CONVERSION_FORMAT,
+            USE_CUSTOM_AUDIO_PRESET,
+            AUDIO_FORMAT,
+            AUDIO_QUALITY,
+            FORMAT_SORTING,
+            SORTING_FIELDS,
+        ).any(::containsKey)
+    }
+
     fun getAudioConvertFormat(): Int = AUDIO_CONVERSION_FORMAT.getInt()
 
     fun getVideoResolution(): Int = VIDEO_QUALITY.getInt()
