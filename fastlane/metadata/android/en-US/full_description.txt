@@ -1,10 +1,18 @@
-<b>Features</b>
-Download videos and audio files from video platforms supported by yt-dlp
-Embed metadata and video thumbnail into extracted audio files
-Download all videos in the playlist with one click
-Use embedded aria2c as external downloader for all your downloads
-Embed subtitles into downloaded videos
-Execute custom yt-dlp commands with templates
-Manage in-app downloads and custom command templates
-Easy to use and user-friendly
-Material Design 3 style UI, with dynamic color theme
+<b>What it does</b>
+Snetch is a queue-first downloader for Android built on top of yt-dlp. It is designed for people who keep adding links and want the app to stay readable instead of turning into a pile of parallel work.
+
+<b>Main features</b>
+- Download video and audio from sites supported by yt-dlp
+- Queue-first workflow with sequential downloads by default
+- Saved presets for repeat downloads
+- Playlist links can expand into individual queued items
+- Wi-Fi-aware queueing for metered-network control
+- Format selection, subtitles, thumbnails, metadata, and custom command templates
+
+<b>Why this fork exists</b>
+Many Android downloaders look fast until they start too much work at once. Snetch leans in the opposite direction: calmer queue handling, clearer task states, and fewer surprises on real devices.
+
+<b>Notes for F-Droid users</b>
+- F-Droid builds do not use the in-app auto-update flow
+- The app includes no Google Play Services dependency
+- Some websites may still require cookies or a logged-in session before downloads will work

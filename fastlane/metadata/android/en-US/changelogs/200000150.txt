@@ -1,0 +1,5 @@
+- Added saved preset auto-queue behavior for repeated downloads
+- Expanded playlist links into individual queued tasks
+- Improved waiting-state labels for network and Wi-Fi-only queueing
+- Added clearer failure messages for cookies, login, Cloudflare, and Android file access issues
+- Refreshed release signing docs and fork metadata
