@@ -18,16 +18,15 @@ class NotificationActionReceiver : BroadcastReceiver(), KoinComponent {
 
     companion object {
         private const val TAG = "CancelReceiver"
-        private const val PACKAGE_NAME_PREFIX = "com.junkfood.seal."
 
         const val ACTION_CANCEL_TASK = 0
         const val ACTION_ERROR_REPORT = 1
 
-        const val ACTION_KEY = PACKAGE_NAME_PREFIX + "action"
-        const val TASK_ID_KEY = PACKAGE_NAME_PREFIX + "taskId"
+        val ACTION_KEY = "${BuildConfig.APPLICATION_ID}.action"
+        val TASK_ID_KEY = "${BuildConfig.APPLICATION_ID}.taskId"
 
-        const val NOTIFICATION_ID_KEY = PACKAGE_NAME_PREFIX + "notificationId"
-        const val ERROR_REPORT_KEY = PACKAGE_NAME_PREFIX + "error_report"
+        val NOTIFICATION_ID_KEY = "${BuildConfig.APPLICATION_ID}.notificationId"
+        val ERROR_REPORT_KEY = "${BuildConfig.APPLICATION_ID}.error_report"
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {
