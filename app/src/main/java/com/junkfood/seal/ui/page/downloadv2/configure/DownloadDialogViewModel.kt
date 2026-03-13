@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.junkfood.seal.database.objects.CommandTemplate
 import com.junkfood.seal.download.DownloaderV2
 import com.junkfood.seal.download.Task
+import com.junkfood.seal.download.TaskFactory
 import com.junkfood.seal.util.DownloadUtil
 import com.junkfood.seal.util.PlaylistResult
 import com.junkfood.seal.util.VideoInfo
@@ -178,8 +179,46 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
         urlList: List<String>,
         preferences: DownloadUtil.DownloadPreferences,
     ) {
-        urlList.forEach { downloader.enqueue(Task(url = it, preferences = preferences)) }
-        hideDialog()
+        val taskKey = "DownloadPreset_${urlList.joinToString(separator = "|")}"
+        val job =
+            viewModelScope.launch(Dispatchers.IO) {
+                runCatching {
+                    urlList.forEach { url ->
+                        val info =
+                            DownloadUtil.fetchVideoInfoFromUrl(
+                                    url = url,
+                                    preferences = preferences,
+                                    taskKey = taskKey,
+                                )
+                                .getOrThrow()
+
+                        downloader.enqueue(
+                            TaskFactory.createWithFetchedInfo(
+                                info = info,
+                                preferences = preferences,
+                            )
+                        )
+                    }
+                }.onSuccess {
+                    withContext(Dispatchers.Main) {
+                        hideDialog()
+                    }
+                }.onFailure { th ->
+                    withContext(Dispatchers.Main) {
+                        mSheetStateFlow.update {
+                            SheetState.Error(
+                                action =
+                                    Action.DownloadWithPreset(
+                                        urlList = urlList,
+                                        preferences = preferences,
+                                    ),
+                                throwable = th,
+                            )
+                        }
+                    }
+                }
+            }
+        mSheetStateFlow.update { SheetState.Loading(taskKey = taskKey, job = job) }
     }
 
     private fun runCommand(

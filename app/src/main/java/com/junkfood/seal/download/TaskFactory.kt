@@ -11,6 +11,23 @@ import com.junkfood.seal.util.VideoInfo
 import kotlin.math.roundToInt
 
 object TaskFactory {
+    @CheckResult
+    fun createWithFetchedInfo(
+        info: VideoInfo,
+        preferences: DownloadPreferences,
+        type: Task.TypeInfo = Task.TypeInfo.URL,
+    ): TaskWithState {
+        val task = Task(url = info.originalUrl.toString(), type = type, preferences = preferences)
+        val state =
+            Task.State(
+                downloadState = ReadyWithInfo,
+                videoInfo = info,
+                viewState = Task.ViewState.fromVideoInfo(info),
+            )
+
+        return TaskWithState(task, state)
+    }
+
     /**
      * @return A [TaskWithState] with extra configurations made by user in the custom format
      *   selection page
