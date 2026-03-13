@@ -100,9 +100,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            if (keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("githubPublish")
-            }
+            signingConfig =
+                if (keystorePropertiesFile.exists()) {
+                    signingConfigs.getByName("githubPublish")
+                } else {
+                    signingConfigs.getByName("debug")
+                }
         }
         debug {
             if (keystorePropertiesFile.exists()) {
