@@ -20,7 +20,9 @@ import okhttp3.internal.closeQuietly
 const val AUDIO_REGEX = "(mp3|aac|opus|m4a)$"
 const val THUMBNAIL_REGEX = "\\.(jpg|png)$"
 const val SUBTITLE_REGEX = "\\.(lrc|vtt|srt|ass|json3|srv.|ttml)$"
-private const val PRIVATE_DIRECTORY_SUFFIX = ".Seal"
+private const val PUBLIC_DIRECTORY_SUFFIX = "Snetch"
+private const val LEGACY_PUBLIC_DIRECTORY_SUFFIX = "Seal"
+private const val PRIVATE_DIRECTORY_SUFFIX = ".Snetch"
 
 object FileUtil {
     fun openFileFromResult(downloadResult: Result<List<String>>) {
@@ -199,7 +201,17 @@ object FileUtil {
         }
 
     internal fun getExternalDownloadDirectory() =
-        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Seal")
+        File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            PUBLIC_DIRECTORY_SUFFIX,
+        )
+            .also { it.mkdir() }
+
+    internal fun getLegacyExternalDownloadDirectory() =
+        File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            LEGACY_PUBLIC_DIRECTORY_SUFFIX,
+        )
             .also { it.mkdir() }
 
     internal fun getExternalPrivateDownloadDirectory() =

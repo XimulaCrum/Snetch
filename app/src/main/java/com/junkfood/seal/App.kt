@@ -32,6 +32,7 @@ import com.junkfood.seal.util.FileUtil.createEmptyFile
 import com.junkfood.seal.util.FileUtil.getCookiesFile
 import com.junkfood.seal.util.FileUtil.getExternalDownloadDirectory
 import com.junkfood.seal.util.FileUtil.getExternalPrivateDownloadDirectory
+import com.junkfood.seal.util.FileUtil.getLegacyExternalDownloadDirectory
 import com.junkfood.seal.util.NotificationUtil
 import com.junkfood.seal.util.PreferenceUtil
 import com.junkfood.seal.util.PreferenceUtil.getString
@@ -123,10 +124,31 @@ class App : Application() {
             }
         }
 
-        videoDownloadDir = VIDEO_DIRECTORY.getString(getExternalDownloadDirectory().absolutePath)
+        val newDefaultVideoDir = getExternalDownloadDirectory().absolutePath
+        val legacyDefaultVideoDir = getLegacyExternalDownloadDirectory().absolutePath
+        val storedVideoDir = VIDEO_DIRECTORY.getString(newDefaultVideoDir)
+        videoDownloadDir =
+            if (storedVideoDir == legacyDefaultVideoDir) {
+                VIDEO_DIRECTORY.updateString(newDefaultVideoDir)
+                newDefaultVideoDir
+            } else {
+                storedVideoDir
+            }
 
-        audioDownloadDir = AUDIO_DIRECTORY.getString(File(videoDownloadDir, "Audio").absolutePath)
-        if (!PreferenceUtil.containsKey(COMMAND_DIRECTORY)) {
+        val newDefaultAudioDir = File(newDefaultVideoDir, "Audio").absolutePath
+        val legacyDefaultAudioDir = File(legacyDefaultVideoDir, "Audio").absolutePath
+        val storedAudioDir = AUDIO_DIRECTORY.getString(newDefaultAudioDir)
+        audioDownloadDir =
+            if (storedAudioDir == legacyDefaultAudioDir) {
+                AUDIO_DIRECTORY.updateString(newDefaultAudioDir)
+                newDefaultAudioDir
+            } else {
+                storedAudioDir
+            }
+        val storedCommandDir = COMMAND_DIRECTORY.getString(videoDownloadDir)
+        if (storedCommandDir == legacyDefaultVideoDir) {
+            COMMAND_DIRECTORY.updateString(videoDownloadDir)
+        } else if (!PreferenceUtil.containsKey(COMMAND_DIRECTORY)) {
             COMMAND_DIRECTORY.updateString(videoDownloadDir)
         }
         if (Build.VERSION.SDK_INT >= 26) NotificationUtil.createNotificationChannel()
